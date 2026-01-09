@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('maintControl_user', userValue);
             
             // Redireciona para a raiz (sai da pasta login)
-            window.location.href = '../index.html'; 
+            window.location.href = '../../../public/index.html'; 
         } else {
             // Erro: Senha incorreta
             loginButton.disabled = false;

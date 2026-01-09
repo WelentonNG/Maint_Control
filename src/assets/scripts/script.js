@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Se não estiver logado, redireciona para a pasta de login
     if (isLoggedIn !== 'true') {
-        window.location.href = 'login/login.html';
+        window.location.href = '../public/pages/login/login.html';
         return; // Interrompe a execução
     }
 
@@ -13,13 +13,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoutSystem = () => {
             localStorage.removeItem('maintControl_session');
             localStorage.removeItem('maintControl_user');
-            window.location.href = 'login/login.html';
+            window.location.href = '../public/pages/login/login.html';
             console.log("Login efetuado com sucesso")
         }
 
     // ======== ESTADO E CONSTANTES GLOBAIS ========
     const STATUS = ["OK", "EM OPERAÇÃO", "EM MANUTENÇÃO", "INOPERANTE", "ESPERANDO PEÇAS", "HORAS EXCEDENTES"];
-    const API_URL = 'api.php'; 
+    const API_URL = '/MCSRC/backend/api.php';
+
 
     let state = {
         machines: [],
