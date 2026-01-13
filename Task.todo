@@ -1,2 +1,31 @@
-BUG:
-    ☐ Problema de não exibir as maquinas no site (Culpa do script.js)
+Adicionar ao sitema:
+    🔐 Sistema de usuários:
+
+    👥 Níveis de usuário:
+        ☐ Admin @started(26-01-13 19:53)
+        ☐ Usuário comum @started(26-01-13 19:53)
+    🕒 Logs:
+        ☐ Quem fez o quê e quando
+        ☐ 🔑 Recuperação de senha (mesmo que simples)
+
+    Dashboards (isso impressiona muito):
+        ☐ Total de registros
+        ☐ Status (OK, Em manutenção, Inoperante)
+        ☐ Gráfico de barras ou pizza
+        ☐ Últimas ações do sistema
+
+    🧠 Automação:
+        ☐ Se status = INOPERANTE → alerta
+        ☐ Se horas > limite → aviso automático
+        ☐ Manutenção próxima → destaque em vermelho
+        ☐ Contador de dias desde última ação
+
+    Visual que passa profissionalismo:
+        ☐ 🔥 Estados visuais (hover, loading, erro)
+        ☐ ⏳ Skeleton loaders
+        ☐ 🧩 Componentes reutilizáveis
+        ☐ 🌙 Tema claro/escuro (você já tem, ótimo)
+
+
+Coisas para arrumar do sistema:
+    
