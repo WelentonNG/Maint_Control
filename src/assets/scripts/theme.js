@@ -1,3 +1,5 @@
+// Theme toggle script
+
 document.addEventListener('DOMContentLoaded', () => {
 
   const toggleTheme = document.getElementById('toggleTheme');

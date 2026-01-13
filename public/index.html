@@ -5,7 +5,7 @@
   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MaintControl - Controle de Manutenção</title>
-   <link rel="shortcut icon" href="../src/assets/Images/favicon.ico" type="image/x-icon">   
+  <link rel="shortcut icon" href="../src/assets/Images/favicon.ico" type="image/x-icon">   
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link rel="stylesheet" href="../src/assets/styles/style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -14,6 +14,16 @@
     <div class="wrap">
       <header>
         <h1><i class="fa-solid fa-gears" style="color:var(--primary)"></i> MaintControl</h1>
+
+        <!-- User display: mostra o usuário e papel logado -->
+        <div id="userDisplay" style="display:flex;align-items:center;gap:12px;">
+          <div class="small" id="currentUserContainer" style="display:flex;flex-direction:column;align-items:flex-end;">
+            <span style="font-size:13px;color:var(--muted);">Conectado como</span>
+            <strong id="currentUser" style="font-weight:800">—</strong>
+            <span id="currentRole" class="small" style="font-weight:700;color:var(--muted);">—</span>
+          </div>
+        </div>
+
         <div class="controls">
           <button id="btnLogout" class="btn secondary" title="Sair do Sistema" style="border-color: var(--danger); color: var(--danger);">
             <i class="fa-solid fa-right-from-bracket"></i> Sair
