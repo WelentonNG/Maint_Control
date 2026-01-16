@@ -1,0 +1,39 @@
+# Git files
+.git
+.gitignore
+.github
+
+# Node modules (if any)
+node_modules
+npm-debug.log
+
+# Documentation files
+*.md
+README.md
+DOCKER.md
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.log
+tmp/
+temp/
+
+# Build artifacts
+dist/
+build/
