@@ -1,50 +1,50 @@
 # ============================================
-# docker-compose. yml - Maint_Control
+# docker-compose.yml - Maint_Control
 # ============================================
-# ATENÇÃO - SEGURANÇA:  
-# As senhas neste arquivo são padrões para DESENVOLVIMENTO LOCAL apenas.
-# Para produção ou ambientes compartilhados: 
+# ATENÇÃO - SEGURANÇA:   
+# As senhas neste arquivo são padrões para DESENVOLVIMENTO LOCAL apenas. 
+# Para produção ou ambientes compartilhados:  
 # 1. Crie um arquivo . env baseado em .env.example
 # 2. Altere TODAS as senhas para valores seguros
-# 3. Nunca commite o arquivo .env (já está no .gitignore)
-# Veja DOCKER. md seção "Segurança" para mais detalhes. 
+# 3. Nunca commite o arquivo .env (já está no . gitignore)
+# Veja DOCKER. md seção "Segurança" para mais detalhes.  
 # ============================================
 
 services:  
   # Serviço Web:  Apache + PHP
-  web: 
+  web:  
     build: 
       context: .
       dockerfile: Dockerfile
     container_name: maint-control-web
-    ports: 
+    ports:  
       - "0.0.0.0:8080:80"
-    volumes:
+    volumes: 
       # IMPORTANTE: Volume para desenvolvimento hot-reload
       - . :/var/www/html
-    environment: 
+    environment:  
       # Variáveis de ambiente para conexão com banco de dados
       DB_HOST: db
-      DB_NAME:  maintcontrol_db
+      DB_NAME: maintcontrol_db
       DB_USER: root
       DB_PASS: rootpassword
-    depends_on: 
+    depends_on:  
       db:
         condition: service_healthy
     restart: unless-stopped
-    networks:
+    networks: 
       - maint-control-network
 
   # Serviço MySQL
-  db: 
+  db:  
     image: mysql:8.0
     container_name: maint-control-db
-    environment:
+    environment: 
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: maintcontrol_db
-    ports: 
+    ports:  
       - "0.0.0.0:3306:3306"
-    volumes:
+    volumes: 
       # Volume nomeado para persistência de dados
       - mysql_data:/var/lib/mysql
     healthcheck:
@@ -54,11 +54,11 @@ services:
       retries: 5
       start_period: 30s
     restart: unless-stopped
-    networks:
+    networks: 
       - maint-control-network
 
   # phpMyAdmin - Interface web para gerenciar MySQL
-  phpmyadmin:
+  phpmyadmin: 
     image: phpmyadmin/phpmyadmin
     container_name: maint-control-phpmyadmin
     environment:
@@ -71,15 +71,15 @@ services:
     depends_on:
       - db
     restart: unless-stopped
-    networks:
+    networks: 
       - maint-control-network
 
 # Volume nomeado para persistência do MySQL
 volumes:  
-  mysql_data: 
+  mysql_data:  
     driver: local
 
 # Network para comunicação entre containers
-networks: 
+networks:  
   maint-control-network:  
     driver: bridge
