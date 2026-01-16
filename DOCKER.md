@@ -158,7 +158,14 @@ docker exec -it maint-control-web bash
 ### Acessar o MySQL (Cliente)
 
 ```bash
-docker exec -it maint-control-db mysql -u root -prootpassword maintcontrol_db
+# Usar variável de ambiente para evitar expor senha no histórico
+MYSQL_PWD=rootpassword docker exec -it maint-control-db mysql -u root maintcontrol_db
+
+# Ou interativamente
+docker exec -it maint-control-db bash
+# Dentro do container:
+# mysql -u root -p
+# (Digite a senha quando solicitado)
 ```
 
 ### Reconstruir as Imagens
@@ -206,15 +213,24 @@ Você pode criar um usuário usando a própria API da aplicação ou diretamente
 **Opção 1: Via SQL (Recomendado para primeiro usuário)**
 
 ```bash
-# Acessar o MySQL
-docker exec -it maint-control-db mysql -u root -prootpassword maintcontrol_db
+# Acessar o MySQL (usando variável de ambiente para segurança)
+MYSQL_PWD=rootpassword docker exec -it maint-control-db mysql -u root maintcontrol_db
 
-# Executar o comando SQL
-INSERT INTO users (username, password_hash, role, name) 
-VALUES ('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', 'Administrador');
+# Executar o comando SQL para criar o usuário
+# IMPORTANTE: Substitua 'sua_senha_segura' por uma senha forte e única
+# A hash abaixo é apenas um exemplo - GERE SUA PRÓPRIA HASH!
 ```
 
-> 💡 A senha hash acima corresponde a: `password`
+Para gerar uma hash de senha PHP segura, você pode usar:
+```bash
+docker exec -it maint-control-web php -r "echo password_hash('sua_senha_aqui', PASSWORD_DEFAULT);"
+```
+
+Depois execute no MySQL:
+```sql
+INSERT INTO users (username, password_hash, role, name) 
+VALUES ('admin', 'SUA_HASH_GERADA_AQUI', 'admin', 'Administrador');
+```
 
 **Opção 2: Via API (depois do primeiro usuário admin criado)**
 
@@ -281,7 +297,7 @@ docker-compose up -d
 
 3. Teste a conexão manualmente:
    ```bash
-   docker exec -it maint-control-db mysql -u root -prootpassword -e "SELECT 1;"
+   MYSQL_PWD=rootpassword docker exec -it maint-control-db mysql -u root -e "SELECT 1;"
    ```
 
 ### Porta 8080 ou 3306 já em uso
@@ -318,7 +334,7 @@ docker exec -it maint-control-web chmod -R 755 /var/www/html
 **Solução**: Executar o SQL manualmente:
 
 ```bash
-docker exec -i maint-control-db mysql -u root -prootpassword maintcontrol_db < backend/db/Maint_Control.sql
+MYSQL_PWD=rootpassword docker exec -i maint-control-db mysql -u root maintcontrol_db < backend/db/Maint_Control.sql
 ```
 
 ### Ver logs completos
@@ -336,13 +352,13 @@ docker-compose logs db
 ### Fazer Backup do Banco de Dados
 
 ```bash
-docker exec maint-control-db mysqldump -u root -prootpassword maintcontrol_db > backup_$(date +%Y%m%d_%H%M%S).sql
+MYSQL_PWD=rootpassword docker exec maint-control-db mysqldump -u root maintcontrol_db > backup_$(date +%Y%m%d_%H%M%S).sql
 ```
 
 ### Restaurar Backup
 
 ```bash
-docker exec -i maint-control-db mysql -u root -prootpassword maintcontrol_db < backup_20240101_120000.sql
+MYSQL_PWD=rootpassword docker exec -i maint-control-db mysql -u root maintcontrol_db < backup_20240101_120000.sql
 ```
 
 ## 🔒 Segurança

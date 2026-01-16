@@ -30,9 +30,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: maintcontrol_db
-      MYSQL_USER: root
-      # Nota: MYSQL_USER não deve ser 'root' quando usando MYSQL_ROOT_PASSWORD
-      # Para usar root, remova MYSQL_USER ou crie um usuário diferente
+      MYSQL_PWD: rootpassword
     ports:
       - "3306:3306"
     volumes:
@@ -41,7 +39,7 @@ services:
       # Inicialização automática do banco de dados
       - ./backend/db/Maint_Control.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      test: ["CMD", "sh", "-c", "mysqladmin ping -h localhost -u root"]
       interval: 10s
       timeout: 5s
       retries: 5
