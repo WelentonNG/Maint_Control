@@ -70,6 +70,12 @@ Define dois serviços:
    - Inicialização automática do schema via SQL
    - Healthcheck configurado
 
+> ⚠️ **IMPORTANTE - SEGURANÇA**: As senhas padrão no `docker-compose.yml` são apenas para desenvolvimento local. Para ambientes de produção ou compartilhados:
+> 1. **NUNCA** use senhas padrão em produção
+> 2. Use arquivos `.env` (não commitados) para armazenar senhas
+> 3. Considere usar Docker Secrets para ambientes de produção
+> 4. Veja a seção [Segurança](#-segurança) abaixo para mais detalhes
+
 ### Variáveis de Ambiente
 
 As seguintes variáveis são configuradas automaticamente no `docker-compose.yml`:
@@ -81,7 +87,25 @@ As seguintes variáveis são configuradas automaticamente no `docker-compose.yml
 | `DB_USER` | `root` | Usuário do banco |
 | `DB_PASS` | `rootpassword` | Senha do banco |
 
-> ⚠️ **Importante**: Para ambientes de produção, altere a senha padrão!
+> ⚠️ **IMPORTANTE - SEGURANÇA**: 
+> - Os valores padrão acima são APENAS para desenvolvimento local
+> - Para produção, crie um arquivo `.env` baseado em `.env.example` e altere todas as senhas
+> - Adicione `.env` ao `.gitignore` (já está configurado) para nunca commitar senhas
+> - O arquivo `.env.example` fornecido mostra a estrutura, mas use suas próprias senhas seguras
+
+#### Usando arquivo .env (Recomendado para Produção)
+
+1. Copie o arquivo de exemplo:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Edite o `.env` e altere as senhas:
+   ```bash
+   nano .env  # ou use seu editor favorito
+   ```
+
+3. O `docker-compose.yml` já está configurado para usar variáveis de ambiente do shell, então as variáveis do `.env` serão utilizadas automaticamente.
 
 ## 🚀 Uso Básico
 
@@ -212,8 +236,11 @@ Você pode criar um usuário usando a própria API da aplicação ou diretamente
 
 **Opção 1: Via SQL (Recomendado para primeiro usuário)**
 
+> ⚠️ **IMPORTANTE**: Nos exemplos abaixo, `rootpassword` é a senha padrão. Use sua senha real do `.env` ou do `docker-compose.yml`.
+
 ```bash
 # Acessar o MySQL (usando variável de ambiente para segurança)
+# Substitua 'rootpassword' pela sua senha real
 MYSQL_PWD=rootpassword docker exec -it maint-control-db mysql -u root maintcontrol_db
 
 # Executar o comando SQL para criar o usuário
@@ -223,13 +250,26 @@ MYSQL_PWD=rootpassword docker exec -it maint-control-db mysql -u root maintcontr
 
 Para gerar uma hash de senha PHP segura, você pode usar:
 ```bash
-docker exec -it maint-control-web php -r "echo password_hash('sua_senha_aqui', PASSWORD_DEFAULT);"
+# Gerar hash para sua própria senha
+docker exec -it maint-control-web php -r "echo password_hash('sua_senha_aqui', PASSWORD_DEFAULT) . PHP_EOL;"
 ```
 
 Depois execute no MySQL:
 ```sql
 INSERT INTO users (username, password_hash, role, name) 
 VALUES ('admin', 'SUA_HASH_GERADA_AQUI', 'admin', 'Administrador');
+```
+
+Exemplo completo:
+```bash
+# 1. Gerar a hash
+HASH=$(docker exec -it maint-control-web php -r "echo password_hash('MinhaS3nhaS3gura!', PASSWORD_DEFAULT);")
+
+# 2. Inserir no banco (substitua rootpassword pela sua senha real)
+MYSQL_PWD=rootpassword docker exec -i maint-control-db mysql -u root maintcontrol_db <<EOF
+INSERT INTO users (username, password_hash, role, name) 
+VALUES ('admin', '$HASH', 'admin', 'Administrador');
+EOF
 ```
 
 **Opção 2: Via API (depois do primeiro usuário admin criado)**
@@ -363,19 +403,109 @@ MYSQL_PWD=rootpassword docker exec -i maint-control-db mysql -u root maintcontro
 
 ## 🔒 Segurança
 
-Para ambientes de produção, considere:
+### Para Desenvolvimento Local
 
-1. **Alterar senhas padrão** no `docker-compose.yml`
-2. **Usar arquivo `.env`** para variáveis sensíveis:
-   ```bash
-   # .env
-   DB_ROOT_PASSWORD=sua_senha_segura
-   DB_PASSWORD=outra_senha_segura
-   ```
+O arquivo `docker-compose.yml` inclui senhas padrão apenas para facilitar o desenvolvimento local. Isto é aceitável APENAS para ambientes de desenvolvimento em máquinas locais.
 
-3. **Não expor porta do MySQL publicamente**: Remover o `ports: 3306:3306` do serviço db
+### Para Ambientes de Produção ou Compartilhados
 
-4. **Usar HTTPS**: Configurar um reverse proxy (Nginx) com certificado SSL
+⚠️ **NUNCA use as senhas padrão!** Siga estas práticas recomendadas:
+
+#### 1. Use Arquivo .env
+
+Crie um arquivo `.env` (já está no `.gitignore`):
+
+```bash
+# Copiar exemplo
+cp .env.example .env
+
+# Editar com senhas fortes
+nano .env
+```
+
+Exemplo de `.env` com senhas seguras:
+```env
+DB_HOST=db
+DB_NAME=maintcontrol_db
+DB_USER=root
+DB_PASS=SuaSenhaSeguraAqui2024!
+
+MYSQL_ROOT_PASSWORD=SuaSenhaSeguraAqui2024!
+MYSQL_DATABASE=maintcontrol_db
+```
+
+Depois, referencie no `docker-compose.yml`:
+```yaml
+services:
+  web:
+    env_file:
+      - .env
+  db:
+    env_file:
+      - .env
+```
+
+#### 2. Alterar Senhas Padrão
+
+Se não usar `.env`, edite diretamente o `docker-compose.yml` e substitua `rootpassword` por uma senha forte.
+
+#### 3. Não Expor Porta do MySQL Publicamente
+
+Para produção, remova a exposição da porta 3306:
+
+```yaml
+services:
+  db:
+    # ports:
+    #   - "3306:3306"  # Comentar ou remover
+```
+
+A aplicação web ainda conseguirá conectar via rede interna Docker.
+
+#### 4. Use HTTPS
+
+Configure um reverse proxy (Nginx, Traefik, Caddy) com certificado SSL/TLS na frente da aplicação.
+
+#### 5. Restrinja Permissões de Arquivo
+
+Certifique-se que arquivos sensíveis não são acessíveis:
+
+```bash
+chmod 600 .env  # Apenas o dono pode ler/escrever
+```
+
+#### 6. Docker Secrets (Avançado)
+
+Para ambientes de produção com Docker Swarm:
+
+```yaml
+secrets:
+  db_root_password:
+    external: true
+
+services:
+  db:
+    secrets:
+      - db_root_password
+    environment:
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+```
+
+### Checklist de Segurança
+
+Antes de fazer deploy em produção:
+
+- [ ] Alterar todas as senhas padrão
+- [ ] Usar `.env` ou Docker Secrets para credenciais
+- [ ] Não expor porta MySQL (3306) publicamente
+- [ ] Configurar HTTPS/SSL
+- [ ] Fazer backup regular do banco de dados
+- [ ] Manter imagens Docker atualizadas
+- [ ] Usar usuário não-root no container (se possível)
+- [ ] Implementar rate limiting e firewall
+- [ ] Monitorar logs de acesso e erros
+
+---
 
 ## 📚 Referências
 

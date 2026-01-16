@@ -1,3 +1,15 @@
+# ============================================
+# docker-compose.yml - Maint_Control
+# ============================================
+# ATENÇÃO - SEGURANÇA:
+# As senhas neste arquivo são padrões para DESENVOLVIMENTO LOCAL apenas.
+# Para produção ou ambientes compartilhados:
+# 1. Crie um arquivo .env baseado em .env.example
+# 2. Altere TODAS as senhas para valores seguros
+# 3. Nunca commite o arquivo .env (já está no .gitignore)
+# Veja DOCKER.md seção "Segurança" para mais detalhes.
+# ============================================
+
 services:
   # Serviço Web: Apache + PHP
   web:
