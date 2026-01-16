@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  # Serviço Web: Apache + PHP
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: maint-control-web
+    ports:
+      - "8080:80"
+    volumes:
+      # Volume para desenvolvimento: mapear diretório local para /var/www/html
+      - .:/var/www/html
+    environment:
+      # Variáveis de ambiente para conexão com banco de dados
+      DB_HOST: db
+      DB_NAME: maintcontrol_db
+      DB_USER: root
+      DB_PASS: rootpassword
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - maint-control-network
+
+  # Serviço MySQL
+  db:
+    image: mysql:8.0
+    container_name: maint-control-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: maintcontrol_db
+      MYSQL_USER: root
+      # Nota: MYSQL_USER não deve ser 'root' quando usando MYSQL_ROOT_PASSWORD
+      # Para usar root, remova MYSQL_USER ou crie um usuário diferente
+    ports:
+      - "3306:3306"
+    volumes:
+      # Volume nomeado para persistência de dados
+      - mysql_data:/var/lib/mysql
+      # Inicialização automática do banco de dados
+      - ./backend/db/Maint_Control.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - maint-control-network
+
+# Volume nomeado para persistência do MySQL
+volumes:
+  mysql_data:
+    driver: local
+
+# Network para comunicação entre containers
+networks:
+  maint-control-network:
+    driver: bridge

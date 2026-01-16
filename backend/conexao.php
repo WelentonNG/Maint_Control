@@ -1,9 +1,11 @@
 <?php
 
-    $DB_HOST = '127.0.0.1';
-    $DB_NAME = 'maintcontrol_db';
-    $DB_USER = 'root';
-    $DB_PASS = '';
+    // Configuração de Banco de Dados
+    // Suporta variáveis de ambiente para Docker ou valores padrão para desenvolvimento local
+    $DB_HOST = getenv('DB_HOST') ?: '127.0.0.1';
+    $DB_NAME = getenv('DB_NAME') ?: 'maintcontrol_db';
+    $DB_USER = getenv('DB_USER') ?: 'root';
+    $DB_PASS = getenv('DB_PASS') ?: '';
     $DB_CHARSET = 'utf8mb4';
 
     $dsn = "mysql:host=$DB_HOST;dbname=$DB_NAME;charset=$DB_CHARSET";
