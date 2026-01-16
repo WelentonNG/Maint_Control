@@ -1,9 +1,9 @@
 # ============================================
 # docker-compose. yml - Maint_Control
 # ============================================
-# ATENÇÃO - SEGURANÇA: 
+# ATENÇÃO - SEGURANÇA:  
 # As senhas neste arquivo são padrões para DESENVOLVIMENTO LOCAL apenas.
-# Para produção ou ambientes compartilhados: 
+# Para produção ou ambientes compartilhados:  
 # 1. Crie um arquivo .env baseado em .env.example
 # 2. Altere TODAS as senhas para valores seguros
 # 3. Nunca commite o arquivo . env (já está no .gitignore)
@@ -18,14 +18,14 @@ services:
       dockerfile: Dockerfile
     container_name: maint-control-web
     ports: 
-      - "8080:80"
-    volumes:
+      - "0.0.0.0:8080:80"
+    volumes: 
       # Volume para desenvolvimento: mapear diretório local para /var/www/html
-      - .:/var/www/html
+      - . :/var/www/html
     environment: 
       # Variáveis de ambiente para conexão com banco de dados
       DB_HOST: db
-      DB_NAME: maintcontrol_db
+      DB_NAME:  maintcontrol_db
       DB_USER: root
       DB_PASS: rootpassword
     depends_on: 
@@ -42,13 +42,13 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: maintcontrol_db
-    ports:
-      - "3306:3306"
+    ports: 
+      - "0.0.0.0:3306:3306"
     volumes: 
       # Volume nomeado para persistência de dados
       - mysql_data:/var/lib/mysql
       # Inicialização automática do banco de dados
-      - ./backend/db/Maint_Control.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./backend/db/Maint_Control.sql:/docker-entrypoint-initdb. d/init.sql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
       interval: 10s
@@ -64,12 +64,12 @@ services:
     image:  phpmyadmin/phpmyadmin
     container_name: maint-control-phpmyadmin
     environment:
-      PMA_HOST:  db
-      PMA_PORT:  3306
+      PMA_HOST: db
+      PMA_PORT: 3306
       PMA_USER: root
       PMA_PASSWORD: rootpassword
     ports:
-      - "8081:80"
+      - "0.0.0.0:8081:80"
     depends_on: 
       - db
     restart: unless-stopped
