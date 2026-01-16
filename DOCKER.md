@@ -241,7 +241,7 @@ Você pode criar um usuário usando a própria API da aplicação ou diretamente
 ```bash
 # Acessar o MySQL (usando variável de ambiente para segurança)
 # Substitua 'rootpassword' pela sua senha real
-MYSQL_PWD=rootpassword docker exec -it maint-control-db mysql -u root maintcontrol_db
+MYSQL_PWD=your_actual_password docker exec -it maint-control-db mysql -u root maintcontrol_db
 
 # Executar o comando SQL para criar o usuário
 # IMPORTANTE: Substitua 'sua_senha_segura' por uma senha forte e única
@@ -315,7 +315,7 @@ Se preferir executar localmente sem Docker:
 # Ver logs do MySQL
 docker-compose logs db
 
-# Remover volumes e reiniciar
+# Remover volumes e reiniciar (use sua senha real)
 docker-compose down -v
 docker-compose up -d
 ```
@@ -335,9 +335,9 @@ docker-compose up -d
    docker inspect maint-control-db | grep -A 10 Health
    ```
 
-3. Teste a conexão manualmente:
+3. Teste a conexão manualmente (use sua senha real no lugar de 'your_actual_password'):
    ```bash
-   MYSQL_PWD=rootpassword docker exec -it maint-control-db mysql -u root -e "SELECT 1;"
+   MYSQL_PWD=your_actual_password docker exec -it maint-control-db mysql -u root -e "SELECT 1;"
    ```
 
 ### Porta 8080 ou 3306 já em uso
@@ -371,10 +371,10 @@ docker exec -it maint-control-web chmod -R 755 /var/www/html
 
 **Problema**: Ao acessar a aplicação, erro de "tabela não existe".
 
-**Solução**: Executar o SQL manualmente:
+**Solução**: Executar o SQL manualmente (use sua senha real):
 
 ```bash
-MYSQL_PWD=rootpassword docker exec -i maint-control-db mysql -u root maintcontrol_db < backend/db/Maint_Control.sql
+MYSQL_PWD=your_actual_password docker exec -i maint-control-db mysql -u root maintcontrol_db < backend/db/Maint_Control.sql
 ```
 
 ### Ver logs completos
@@ -392,13 +392,15 @@ docker-compose logs db
 ### Fazer Backup do Banco de Dados
 
 ```bash
-MYSQL_PWD=rootpassword docker exec maint-control-db mysqldump -u root maintcontrol_db > backup_$(date +%Y%m%d_%H%M%S).sql
+# Use sua senha real no lugar de 'your_actual_password'
+MYSQL_PWD=your_actual_password docker exec maint-control-db mysqldump -u root maintcontrol_db > backup_$(date +%Y%m%d_%H%M%S).sql
 ```
 
 ### Restaurar Backup
 
 ```bash
-MYSQL_PWD=rootpassword docker exec -i maint-control-db mysql -u root maintcontrol_db < backup_20240101_120000.sql
+# Use sua senha real no lugar de 'your_actual_password'
+MYSQL_PWD=your_actual_password docker exec -i maint-control-db mysql -u root maintcontrol_db < backup_20240101_120000.sql
 ```
 
 ## 🔒 Segurança
@@ -434,16 +436,28 @@ MYSQL_ROOT_PASSWORD=SuaSenhaSeguraAqui2024!
 MYSQL_DATABASE=maintcontrol_db
 ```
 
-Depois, referencie no `docker-compose.yml`:
+Depois, referencie no `docker-compose.yml` adicionando a linha `env_file`:
+
 ```yaml
 services:
   web:
+    build: .
     env_file:
-      - .env
+      - .env  # Adicionar esta linha
+    environment:
+      # Você pode manter ou remover as variáveis aqui
+      DB_HOST: db
+      # ... outras variáveis virão do .env
+  
   db:
+    image: mysql:8.0
     env_file:
-      - .env
+      - .env  # Adicionar esta linha
+    environment:
+      # As variáveis do .env terão precedência
 ```
+
+> **Nota**: O docker-compose.yml fornecido usa valores diretamente no arquivo para facilitar desenvolvimento local. Para usar `.env`, você precisa adicionar `env_file` conforme o exemplo acima.
 
 #### 2. Alterar Senhas Padrão
 
