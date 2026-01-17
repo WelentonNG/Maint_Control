@@ -1,9 +1,0 @@
-docker-compose exec web bash -c "cat > /var/www/html/public/.htaccess << 'EOF'
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    RewriteBase /public/
-    
-    # Permite acesso de qualquer IP
-    Require all granted
-</IfModule>
-EOF"

@@ -2,8 +2,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // ====== CONFIG ======
   // Ajuste se necessário. Use o caminho absoluto ou relativo correto para seu servidor.
   const API_URLS = [
-      '/backend/api.php',
-      '../../../backend/api.php'
+    '/MCSRC/backend/api.php',
+    '/MC/backend/api.php',
+    '/backend/api.php',
+    '../../../backend/api.php',
+    '/MCSRC/backend/api.php' // fallback
   ];
 
   // Elementos DOM
