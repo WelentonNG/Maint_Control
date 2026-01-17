@@ -152,7 +152,11 @@ try {
                 if (!authorize($currentUser, ['admin'])) {
                     throw new Exception('Permissão negada. Somente Admin pode excluir máquinas.');
                 }
-                handleDeleteMachine($pdo, $input['tag']);
+                $tag = isset($input['tag']) ? $input['tag'] : null;
+                if (!$tag) {
+                    throw new Exception('Tag da máquina é obrigatória para exclusão.');
+                }
+                handleDeleteMachine($pdo, $tag);
             } else {
                 throw new Exception('Ação DELETE desconhecida.');
             }
@@ -305,6 +309,9 @@ function handleGetMachines($pdo) {
     $stmt = $pdo->query("SELECT id, nome, tag, status, descricao, horas_uso FROM maquinas");
     $machines_db = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+    // DEBUG: Log para ver o que vem do banco
+    error_log("DEBUG: Máquinas do DB: " . json_encode($machines_db));
+
     // Dados agrupados
     $history_data = $pdo->query("SELECT maquina_id, data_hora, descricao FROM historico ORDER BY data_hora DESC")->fetchAll(PDO::FETCH_GROUP);
     $agendamento_data = $pdo->query("SELECT maquina_id, data_agendada, observacoes FROM agendamentos")->fetchAll(PDO::FETCH_GROUP);
@@ -353,12 +360,12 @@ function handleGetMachines($pdo) {
             }, $manutencao_data[$id_maquina_db]) : [];
 
         return [
-            'id' => $m['tag'],
-            'name' => $m['nome'],
-            'capacity' => isset($m['descricao']) ? $m['descricao'] : 'N/A',
+            'id' => $m['tag'] ?? $m['id'],
+            'name' => $m['nome'] ?? 'N/A',
+            'capacity' => $m['descricao'] ?? 'N/A',
             'manufacturer' => null,
-            'quantity' => (int)(isset($m['horas_uso']) ? $m['horas_uso'] : 1),
-            'status' => $m['status'],
+            'quantity' => (int)($m['horas_uso'] ?? 0),
+            'status' => $m['status'] ?? 'OK',
             'maintenance' => $maintenance_history,
             'history' => $history,
             'nextMaint' => $nextMaint

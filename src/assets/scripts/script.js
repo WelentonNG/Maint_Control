@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sortBy: 'id',
         sortDir: 'asc',
         page: 1,
-        perPage: 8,
+        pageSize: 8,
         editingIndex: null
     };
 
@@ -405,6 +405,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const startNum = total === 0 ? 0 : start + 1;
         const endNum = Math.min(start + pagedLength, total);
         DOMElements.showingRange.innerHTML = `<b>${startNum}-${endNum}</b> de <b>${total}</b>`;
+    };
+
+    // ======== RENDER PRINCIPAL ========
+    const render = () => {
+        const filtered = getProcessedItems();
+        const total = filtered.length;
+        const totalPages = Math.ceil(total / state.pageSize);
+        
+        if (state.page > totalPages && totalPages > 0) state.page = totalPages;
+        if (state.page < 1) state.page = 1;
+
+        const start = (state.page - 1) * state.pageSize;
+        const paged = filtered.slice(start, start + state.pageSize);
+
+        renderTable(paged);
+        renderPager(totalPages);
+        updateShowingRange(total, start, paged.length);
+        updateMetrics();
+        renderStatusTable();
     };
 
     // ======== MODAL ========
