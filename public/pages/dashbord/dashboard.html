@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MaintControl - Dashboard</title>
+  <link rel="shortcut icon" href="../../../src/assets/Images/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="../../../src/assets/styles/dashboard.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Theme Toggle -->
+  <div class="theme-toggle" id="toggleTheme" title="Alterar Tema">
+    <i class="fa-solid fa-moon"></i>
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <i class="fa-solid fa-gears"></i>
+        <h2>MaintControl</h2>
+      </div>
+      <button class="sidebar-toggle" id="sidebarToggle">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="#dashboard" class="nav-item active" data-section="dashboard">
+        <i class="fa-solid fa-chart-line"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="#machines" class="nav-item" data-section="machines">
+        <i class="fa-solid fa-industry"></i>
+        <span>Máquinas</span>
+      </a>
+      <a href="#maintenance" class="nav-item" data-section="maintenance">
+        <i class="fa-solid fa-wrench"></i>
+        <span>Manutenções</span>
+      </a>
+      <a href="#schedule" class="nav-item" data-section="schedule">
+        <i class="fa-solid fa-calendar-days"></i>
+        <span>Agendamentos</span>
+      </a>
+      <a href="#history" class="nav-item" data-section="history">
+        <i class="fa-solid fa-clock-rotate-left"></i>
+        <span>Histórico</span>
+      </a>
+      <a href="#reports" class="nav-item" data-section="reports">
+        <i class="fa-solid fa-file-lines"></i>
+        <span>Relatórios</span>
+      </a>
+      <a href="#users" class="nav-item" data-section="users" id="usersNav">
+        <i class="fa-solid fa-users"></i>
+        <span>Usuários</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info" id="userInfo">
+        <i class="fa-solid fa-user-circle"></i>
+        <div class="user-details">
+          <span class="user-name" id="userName">Admin</span>
+          <span class="user-role" id="userRole">Administrador</span>
+        </div>
+      </div>
+      <button class="logout-btn" id="logoutBtn">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        <span>Sair</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="top-header">
+      <div class="header-left">
+        <button class="mobile-menu-toggle" id="mobileMenuToggle">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <h1 class="page-title" id="pageTitle">Dashboard</h1>
+      </div>
+      <div class="header-right">
+        <button class="header-btn" id="refreshBtn" title="Atualizar dados">
+          <i class="fa-solid fa-arrows-rotate"></i>
+        </button>
+        <button class="header-btn" id="notificationsBtn" title="Notificações">
+          <i class="fa-solid fa-bell"></i>
+          <span class="notification-badge" id="notificationBadge">3</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Dashboard Section -->
+    <section class="content-section active" id="dashboardSection">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon blue">
+            <i class="fa-solid fa-industry"></i>
+          </div>
+          <div class="stat-details">
+            <h3 id="totalMachines">0</h3>
+            <p>Total de Máquinas</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+          <div class="stat-details">
+            <h3 id="machinesOk">0</h3>
+            <p>Máquinas OK</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon orange">
+            <i class="fa-solid fa-wrench"></i>
+          </div>
+          <div class="stat-details">
+            <h3 id="machinesMaintenance">0</h3>
+            <p>Em Manutenção</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon red">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </div>
+          <div class="stat-details">
+            <h3 id="machinesInoperative">0</h3>
+            <p>Inoperantes</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="dashboard-card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-chart-pie"></i> Status das Máquinas</h3>
+          </div>
+          <div class="card-body">
+            <canvas id="statusChart"></canvas>
+          </div>
+        </div>
+
+        <div class="dashboard-card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-calendar-check"></i> Próximas Manutenções</h3>
+          </div>
+          <div class="card-body">
+            <div class="upcoming-maintenance" id="upcomingMaintenance">
+              <p class="no-data">Nenhuma manutenção agendada</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-card full-width">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-chart-line"></i> Manutenções por Mês</h3>
+          </div>
+          <div class="card-body">
+            <canvas id="maintenanceChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Machines Section -->
+    <section class="content-section" id="machinesSection">
+      <div class="section-header">
+        <h2>Gerenciamento de Máquinas</h2>
+        <div class="section-actions">
+          <button class="btn btn-primary" id="addMachineBtn">
+            <i class="fa-solid fa-plus"></i> Adicionar Máquina
+          </button>
+          <button class="btn btn-secondary" id="importMachinesBtn">
+            <i class="fa-solid fa-file-import"></i> Importar
+          </button>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <div class="search-box">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="machineSearch" placeholder="Buscar máquinas...">
+        </div>
+        <select id="statusFilter" class="filter-select">
+          <option value="">Todos os Status</option>
+          <option value="OK">OK</option>
+          <option value="EM OPERAÇÃO">Em Operação</option>
+          <option value="EM MANUTENÇÃO">Em Manutenção</option>
+          <option value="INOPERANTE">Inoperante</option>
+          <option value="ESPERANDO PEÇAS">Esperando Peças</option>
+          <option value="HORAS EXCEDENTES">Horas Excedentes</option>
+        </select>
+      </div>
+
+      <div class="table-container">
+        <table class="data-table" id="machinesTable">
+          <thead>
+            <tr>
+              <th>TAG</th>
+              <th>Nome</th>
+              <th>Descrição</th>
+              <th>Horas de Uso</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="machinesTableBody">
+            <tr>
+              <td colspan="6" class="no-data">Carregando máquinas...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Maintenance Section -->
+    <section class="content-section" id="maintenanceSection">
+      <div class="section-header">
+        <h2>Gerenciamento de Manutenções</h2>
+        <button class="btn btn-primary" id="startMaintenanceBtn">
+          <i class="fa-solid fa-play"></i> Iniciar Manutenção
+        </button>
+      </div>
+
+      <div class="maintenance-grid" id="maintenanceGrid">
+        <p class="no-data">Nenhuma manutenção em andamento</p>
+      </div>
+    </section>
+
+    <!-- Schedule Section -->
+    <section class="content-section" id="scheduleSection">
+      <div class="section-header">
+        <h2>Agendamentos</h2>
+        <button class="btn btn-primary" id="addScheduleBtn">
+          <i class="fa-solid fa-calendar-plus"></i> Novo Agendamento
+        </button>
+      </div>
+
+      <div class="calendar-container" id="calendarContainer">
+        <div class="calendar-header">
+          <button class="calendar-nav" id="prevMonth">
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+          <h3 id="currentMonth">Janeiro 2026</h3>
+          <button class="calendar-nav" id="nextMonth">
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
+        </div>
+        <div class="calendar-grid" id="calendarGrid">
+          <!-- Calendar will be generated by JS -->
+        </div>
+      </div>
+
+      <div class="schedule-list" id="scheduleList">
+        <h3>Agendamentos Próximos</h3>
+        <div id="scheduleItems">
+          <p class="no-data">Nenhum agendamento próximo</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- History Section -->
+    <section class="content-section" id="historySection">
+      <div class="section-header">
+        <h2>Histórico de Alterações</h2>
+        <div class="section-actions">
+          <select id="historyMachineFilter" class="filter-select">
+            <option value="">Todas as Máquinas</option>
+          </select>
+          <input type="date" id="historyDateFilter" class="filter-input">
+        </div>
+      </div>
+
+      <div class="timeline" id="historyTimeline">
+        <p class="no-data">Nenhum histórico encontrado</p>
+      </div>
+    </section>
+
+    <!-- Reports Section -->
+    <section class="content-section" id="reportsSection">
+      <div class="section-header">
+        <h2>Relatórios</h2>
+        <button class="btn btn-primary" id="generateReportBtn">
+          <i class="fa-solid fa-file-pdf"></i> Gerar Relatório
+        </button>
+      </div>
+
+      <div class="reports-grid">
+        <div class="report-card">
+          <i class="fa-solid fa-clock"></i>
+          <h3>Horas de Operação</h3>
+          <p>Total de horas operadas por máquina</p>
+          <button class="btn btn-sm" onclick="generateReport('hours')">Ver Relatório</button>
+        </div>
+        <div class="report-card">
+          <i class="fa-solid fa-dollar-sign"></i>
+          <h3>Custos de Manutenção</h3>
+          <p>Análise de custos por máquina e período</p>
+          <button class="btn btn-sm" onclick="generateReport('costs')">Ver Relatório</button>
+        </div>
+        <div class="report-card">
+          <i class="fa-solid fa-chart-bar"></i>
+          <h3>Eficiência Operacional</h3>
+          <p>Tempo de operação vs manutenção</p>
+          <button class="btn btn-sm" onclick="generateReport('efficiency')">Ver Relatório</button>
+        </div>
+        <div class="report-card">
+          <i class="fa-solid fa-wrench"></i>
+          <h3>Histórico de Manutenções</h3>
+          <p>Relatório completo de manutenções realizadas</p>
+          <button class="btn btn-sm" onclick="generateReport('maintenance')">Ver Relatório</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Users Section (Admin Only) -->
+    <section class="content-section" id="usersSection">
+      <div class="section-header">
+        <h2>Gerenciamento de Usuários</h2>
+        <button class="btn btn-primary" id="addUserBtn">
+          <i class="fa-solid fa-user-plus"></i> Adicionar Usuário
+        </button>
+      </div>
+
+      <div class="table-container">
+        <table class="data-table" id="usersTable">
+          <thead>
+            <tr>
+              <th>Usuário</th>
+              <th>Nome</th>
+              <th>Função</th>
+              <th>Criado em</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody">
+            <tr>
+              <td colspan="5" class="no-data">Carregando usuários...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal Container -->
+  <div class="modal" id="modal">
+    <div class="modal-content" id="modalContent">
+      <!-- Modal content will be dynamically inserted -->
+    </div>
+  </div>
+
+  <!-- Include Chart.js for charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="../../../src/assets/scripts/dashboard.js"></script>
+</body>
+</html>

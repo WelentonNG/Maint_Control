@@ -22,13 +22,13 @@
   </div>
 
   <div class="login-container">
-    <div class="login-card">
+    <div class="login-card" id="loginCard">
       <div class="login-header">
         <div class="login-logo">
-          <i class="fa-solid fa-gears"></i>
-          <h1>MaintControl</h1>
+          <i class="fa-solid fa-user-plus"></i>
+          <h1>Solicitar Acesso</h1>
         </div>
-        <p class="login-subtitle">Preencha seus dados para solicitar acesso</p>
+        <p class="login-subtitle">Preencha seus dados para solicitar acesso ao sistema</p>
       </div>
 
       <form class="login-form" id="requestAccessForm">
@@ -38,6 +38,7 @@
             <input type="text" id="fullName" class="form-input" placeholder="Digite seu nome completo" required>
             <i class="fa-solid fa-user"></i>
           </div>
+          <div class="validation-message" id="nameValidation"></div>
         </div>
         
         <div class="form-group">
@@ -46,14 +47,29 @@
             <input type="email" id="email" class="form-input" placeholder="Digite seu e-mail" required>
             <i class="fa-solid fa-envelope"></i>
           </div>
+          <div class="validation-message" id="emailValidation"></div>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="department">Departamento</label>
+          <label class="form-label" for="department">Departamento/Cargo</label>
           <div class="input-with-icon">
             <input type="text" id="department" class="form-input" placeholder="Seu departamento ou cargo" required>
             <i class="fa-solid fa-briefcase"></i>
           </div>
+          <div class="validation-message" id="departmentValidation"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="reason">Motivo da Solicitação</label>
+          <textarea id="reason" class="form-input" rows="3" placeholder="Descreva brevemente o motivo da solicitação" required style="min-height: 80px; resize: vertical; padding: 12px;"></textarea>
+          <div class="validation-message" id="reasonValidation"></div>
+        </div>
+
+        <div style="background: rgba(139, 92, 246, 0.1); border-left: 4px solid #8b5cf6; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+          <p style="margin: 0; font-size: 13px; color: var(--text); line-height: 1.5;">
+            <i class="fa-solid fa-circle-info" style="color: #8b5cf6; margin-right: 8px;"></i>
+            Sua solicitação será enviada ao administrador do sistema para aprovação. Você receberá um retorno em até 48 horas úteis.
+          </p>
         </div>
 
         <button type="submit" class="login-button" id="submitButton">
@@ -63,16 +79,171 @@
       </form>
 
       <div class="login-footer">
-        <p>
-          <a href="http://localhost/MCSRC/public/pages/login/login.html">
-            <i class="fa-solid fa-arrow-left"></i>
-            Voltar para o login
-          </a>
-        </p>
+        <p>Já tem uma conta? <a href="login.html">Fazer login</a></p>
       </div>
     </div>
   </div>
 
-<script src="../../../src/assets/scripts/theme.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const requestAccessForm = document.getElementById('requestAccessForm');
+      const fullNameInput = document.getElementById('fullName');
+      const emailInput = document.getElementById('email');
+      const departmentInput = document.getElementById('department');
+      const reasonInput = document.getElementById('reason');
+      const submitButton = document.getElementById('submitButton');
+      const loginCard = document.getElementById('loginCard');
+      const toggleTheme = document.getElementById('toggleTheme');
+
+      // Aplicar tema salvo
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      if (toggleTheme) {
+        const icon = toggleTheme.querySelector('i');
+        if (icon) icon.className = savedTheme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+      }
+
+      // Toggle tema
+      if (toggleTheme) {
+        toggleTheme.addEventListener('click', () => {
+          const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+          const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+          document.documentElement.setAttribute('data-theme', newTheme);
+          localStorage.setItem('theme', newTheme);
+          const icon = toggleTheme.querySelector('i');
+          if (icon) icon.className = newTheme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+        });
+      }
+
+      // Real-time validation
+      fullNameInput.addEventListener('input', () => {
+        validateField(fullNameInput, 'nameValidation', 'Nome deve ter pelo menos 3 caracteres', 3);
+      });
+
+      emailInput.addEventListener('input', () => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const validation = document.getElementById('emailValidation');
+        const value = emailInput.value.trim();
+
+        if (value.length === 0) {
+          validation.classList.remove('show', 'valid', 'invalid');
+          validation.innerHTML = '';
+        } else if (emailRegex.test(value)) {
+          validation.classList.add('show', 'valid');
+          validation.classList.remove('invalid');
+          validation.innerHTML = '<i class="fa-solid fa-circle-check"></i><span>E-mail válido</span>';
+        } else {
+          validation.classList.add('show', 'invalid');
+          validation.classList.remove('valid');
+          validation.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i><span>E-mail inválido</span>';
+        }
+      });
+
+      departmentInput.addEventListener('input', () => {
+        validateField(departmentInput, 'departmentValidation', 'Departamento deve ter pelo menos 3 caracteres', 3);
+      });
+
+      reasonInput.addEventListener('input', () => {
+        validateField(reasonInput, 'reasonValidation', 'Motivo deve ter pelo menos 10 caracteres', 10);
+      });
+
+      // Form submission
+      requestAccessForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const fullName = fullNameInput.value.trim();
+        const email = emailInput.value.trim();
+        const department = departmentInput.value.trim();
+        const reason = reasonInput.value.trim();
+
+        // Validação
+        if (fullName.length < 3) {
+          showError('nameValidation', 'Nome deve ter pelo menos 3 caracteres');
+          return;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          showError('emailValidation', 'E-mail inválido');
+          return;
+        }
+
+        if (department.length < 3) {
+          showError('departmentValidation', 'Departamento deve ter pelo menos 3 caracteres');
+          return;
+        }
+
+        if (reason.length < 10) {
+          showError('reasonValidation', 'Motivo deve ter pelo menos 10 caracteres');
+          return;
+        }
+
+        setLoading(true);
+
+        // Simular envio (em produção, integrar com API)
+        setTimeout(() => {
+          setLoading(false);
+          
+          // Mostrar mensagem de sucesso
+          loginCard.innerHTML = `
+            <div style="text-align: center; padding: 40px 20px;">
+              <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
+                <i class="fa-solid fa-check" style="font-size: 40px; color: white;"></i>
+              </div>
+              <h2 style="margin-bottom: 16px; color: var(--text);">Solicitação Enviada!</h2>
+              <p style="color: var(--muted); margin-bottom: 32px; line-height: 1.6;">
+                Sua solicitação foi enviada com sucesso ao administrador do sistema. 
+                Você receberá um retorno em até 48 horas úteis no e-mail fornecido.
+              </p>
+              <a href="login.html" class="login-button" style="display: inline-flex; text-decoration: none;">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>Voltar para Login</span>
+              </a>
+            </div>
+          `;
+        }, 1500);
+      });
+
+      function validateField(input, validationId, errorMessage, minLength) {
+        const validation = document.getElementById(validationId);
+        const value = input.value.trim();
+
+        if (value.length === 0) {
+          validation.classList.remove('show', 'valid', 'invalid');
+          validation.innerHTML = '';
+        } else if (value.length >= minLength) {
+          validation.classList.add('show', 'valid');
+          validation.classList.remove('invalid');
+          validation.innerHTML = '<i class="fa-solid fa-circle-check"></i><span>Válido</span>';
+        } else {
+          validation.classList.add('show', 'invalid');
+          validation.classList.remove('valid');
+          validation.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i><span>${errorMessage}</span>`;
+        }
+      }
+
+      function setLoading(isLoading) {
+        if (isLoading) {
+          submitButton.disabled = true;
+          submitButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Enviando...</span>';
+        } else {
+          submitButton.disabled = false;
+          submitButton.innerHTML = '<i class="fa-solid fa-paper-plane"></i><span>Enviar Solicitação</span>';
+        }
+      }
+
+      function showError(validationId, message) {
+        const validation = document.getElementById(validationId);
+        if (validation) {
+          validation.classList.add('show', 'invalid');
+          validation.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i><span>${message}</span>`;
+        }
+        if (loginCard) {
+          loginCard.classList.add('shake');
+          setTimeout(() => loginCard.classList.remove('shake'), 500);
+        }
+      }
+    });
+  </script>
 </body>
 </html>

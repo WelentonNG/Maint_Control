@@ -1,40 +1,457 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MaintControl - Controle de Manutenção</title>
-  <link rel="shortcut icon" href="../src/assets/Images/favicon.ico" type="image/x-icon">   
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MaintControl - Sistema de Controle de Manutenção</title>
+  <link rel="shortcut icon" href="../src/assets/Images/favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-  <link rel="stylesheet" href="../src/assets/styles/style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
-  <body>
-    <div class="wrap">
-      <header>
-        <h1><i class="fa-solid fa-gears" style="color:var(--primary)"></i> MaintControl</h1>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #3b82f6;
+      --primary-dark: #2563eb;
+      --secondary: #64748b;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-light: #64748b;
+      --border: #e2e8f0;
+    }
 
-        <!-- User display: mostra o usuário e papel logado -->
-        <div id="userDisplay" style="display:flex;align-items:center;gap:12px;">
-          <div class="small" id="currentUserContainer" style="display:flex;flex-direction:column;align-items:flex-end;">
-            <span style="font-size:13px;color:var(--muted);">Conectado como</span>
-            <strong id="currentUser" style="font-weight:800">—</strong>
-            <span id="currentRole" class="small" style="font-weight:700;color:var(--muted);">—</span>
-          </div>
-        </div>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        <div class="controls">
-          <button id="btnLogout" class="btn secondary" title="Sair do Sistema" style="border-color: var(--danger); color: var(--danger);">
-            <i class="fa-solid fa-right-from-bracket"></i> Sair
-          </button>
-          
-          <button id="toggleTheme" class="btn secondary" title="Alterar Tema"><i class="fa-solid fa-moon"></i></button>
-          <button id="exportJson" class="btn" title="Exportar Dados"><i class="fa-solid fa-file-export"></i> Exportar JSON</button>
-          <input id="importFile" type="file" accept="application/json" style="display:none" />
-          <button id="importBtn" class="btn secondary" title="Importar Dados"><i class="fa-solid fa-file-import"></i> Importar JSON</button>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* Header */
+    .header {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--primary);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+    }
+
+    .logo-text h1 {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .logo-text p {
+      font-size: 13px;
+      color: var(--text-light);
+    }
+
+    .header-btn {
+      padding: 12px 32px;
+      background: var(--primary);
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    /* Hero Section */
+    .hero {
+      max-width: 1200px;
+      margin: 80px auto;
+      padding: 0 24px;
+      text-align: center;
+    }
+
+    .hero h2 {
+      font-size: 48px;
+      font-weight: 800;
+      margin-bottom: 20px;
+      color: var(--text);
+    }
+
+    .hero p {
+      font-size: 20px;
+      color: var(--text-light);
+      margin-bottom: 40px;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      padding: 16px 40px;
+      background: var(--primary);
+      color: white;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-secondary {
+      padding: 16px 40px;
+      background: white;
+      color: var(--text);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    /* Features */
+    .features {
+      max-width: 1200px;
+      margin: 80px auto;
+      padding: 0 24px;
+    }
+
+    .features h3 {
+      text-align: center;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-light);
+      margin-bottom: 16px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      margin-top: 40px;
+    }
+
+    .feature-card {
+      background: var(--card-bg);
+      padding: 32px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+      border-color: var(--primary);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      transform: translateY(-4px);
+    }
+
+    .feature-icon {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+
+    .feature-card h4 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+
+    .feature-card p {
+      color: var(--text-light);
+      line-height: 1.7;
+    }
+
+    /* Stats */
+    .stats {
+      background: var(--card-bg);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 60px 24px;
+      margin: 80px 0;
+    }
+
+    .stats-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 40px;
+      text-align: center;
+    }
+
+    .stat-item h5 {
+      font-size: 48px;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+
+    .stat-item p {
+      font-size: 16px;
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    /* Footer */
+    .footer {
+      background: var(--card-bg);
+      border-top: 1px solid var(--border);
+      padding: 40px 24px;
+      text-align: center;
+    }
+
+    .footer p {
+      color: var(--text-light);
+      font-size: 14px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero h2 {
+        font-size: 32px;
+      }
+
+      .hero p {
+        font-size: 18px;
+      }
+
+      .cta-buttons {
+        flex-direction: column;
+      }
+
+      .btn-primary, .btn-secondary {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .header-content {
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Animation */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .hero, .features, .stats {
+      animation: fadeInUp 0.8s ease;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <div class="logo-container">
+        <div class="logo-icon">
+          <i class="fa-solid fa-gears"></i>
         </div>
-      </header>
+        <div class="logo-text">
+          <h1>MaintControl</h1>
+          <p>Sistema de Manutenção</p>
+        </div>
+      </div>
+      <a href="./pages/login/login.html" class="header-btn">
+        <i class="fa-solid fa-right-to-bracket"></i>
+        Acessar Sistema
+      </a>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <h2>Controle Total de Manutenção Industrial</h2>
+    <p>Gerencie máquinas, manutenções e agendamentos em uma plataforma completa e intuitiva</p>
+    <div class="cta-buttons">
+      <a href="./pages/login/login.html" class="btn-primary">
+        <i class="fa-solid fa-play"></i>
+        Começar Agora
+      </a>
+      <a href="./pages/dashbord/dashboard.html" class="btn-secondary">
+        <i class="fa-solid fa-chart-line"></i>
+        Ver Dashboard
+      </a>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features">
+    <h3>Funcionalidades</h3>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fa-solid fa-industry"></i>
+        </div>
+        <h4>Gestão de Máquinas</h4>
+        <p>Cadastre e monitore todas as suas máquinas com controle completo de status, horas de uso e informações técnicas.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fa-solid fa-wrench"></i>
+        </div>
+        <h4>Controle de Manutenções</h4>
+        <p>Registre manutenções preventivas e corretivas com histórico detalhado, custos e responsáveis.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fa-solid fa-calendar-check"></i>
+        </div>
+        <h4>Agendamentos</h4>
+        <p>Planeje manutenções futuras com calendário visual e notificações automáticas.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fa-solid fa-chart-bar"></i>
+        </div>
+        <h4>Relatórios Gerenciais</h4>
+        <p>Análise completa de custos, eficiência operacional e indicadores de performance.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+        </div>
+        <h4>Histórico Completo</h4>
+        <p>Rastreie todas as alterações e eventos em ordem cronológica com detalhes.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fa-solid fa-users"></i>
+        </div>
+        <h4>Controle de Acesso</h4>
+        <p>Sistema multiusuário com diferentes níveis de permissão: Admin, Líder e Usuário.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section class="stats">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <h5>100%</h5>
+        <p>Controle Total</p>
+      </div>
+      <div class="stat-item">
+        <h5>24/7</h5>
+        <p>Disponibilidade</p>
+      </div>
+      <div class="stat-item">
+        <h5>Real-Time</h5>
+        <p>Atualizações</p>
+      </div>
+      <div class="stat-item">
+        <h5>∞</h5>
+        <p>Máquinas</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; 2026 MaintControl. Sistema de Controle de Manutenção Industrial.</p>
+  </footer>
+
+  <script>
+    // Auto-redirect se já estiver logado
+    if (localStorage.getItem('maintControl_session') === 'true') {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (!urlParams.has('logout')) {
+        setTimeout(() => {
+          window.location.href = './pages/dashbord/dashboard.html';
+        }, 100);
+      }
+    }
+  </script>
+</body>
+</html>
 
       <div class="grid-2">
         <div>
