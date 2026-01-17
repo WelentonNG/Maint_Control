@@ -227,8 +227,8 @@ function handleLogin($pdo, $data) {
         exit;
     }
 
-    // Verifica senha
-    if (!password_verify($password, $user['password_hash'])) {
+    // Verifica senha (SEM HASH - TEXTO PLANO)
+    if ($password !== $user['password_hash']) {
         http_response_code(401);
         echo json_encode([
             'status' => 'error',
@@ -289,7 +289,7 @@ function handleCreateUser($pdo, $data) {
         throw new Exception('username, password e role são obrigatórios.');
     }
     $username = trim($data['username']);
-    $password_hash = password_hash($data['password'], PASSWORD_DEFAULT);
+    $password_hash = $data['password']; // SEM HASH - SENHA EM TEXTO PLANO
     $role = in_array($data['role'], ['admin', 'lider', 'user']) ? $data['role'] : 'user';
     $name = $data['name'] ?? null;
 
