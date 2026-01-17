@@ -181,33 +181,82 @@ try {
 // =======================
 
 function handleLogin($pdo, $data) {
+    // Validação de entrada
     if (empty($data['username']) || empty($data['password'])) {
-        throw new Exception('Usuário e senha são obrigatórios.');
+        http_response_code(400);
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Usuário e senha são obrigatórios.',
+            'code' => 'MISSING_CREDENTIALS'
+        ]);
+        exit;
     }
-    $username = $data['username'];
+    
+    $username = trim($data['username']);
     $password = $data['password'];
 
-    $stmt = $pdo->prepare("SELECT id, username, password_hash, role, name FROM users WHERE username = ? LIMIT 1");
-    $stmt->execute([$username]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    // Busca usuário no banco
+    try {
+        $stmt = $pdo->prepare("SELECT id, username, password_hash, role, name FROM users WHERE username = ? LIMIT 1");
+        $stmt->execute([$username]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        http_response_code(500);
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Erro ao consultar banco de dados. Verifique se as tabelas existem.',
+            'code' => 'DATABASE_ERROR',
+            'details' => $e->getMessage()
+        ]);
+        exit;
+    }
+    
+    // Verifica se usuário existe
     if (!$user) {
-        throw new Exception('Usuário ou senha incorretos.');
+        http_response_code(401);
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Usuário ou senha incorretos.',
+            'code' => 'INVALID_CREDENTIALS',
+            'hint' => 'Usuário não encontrado. Acesse /MCSRC/backend/debug.php para criar usuário admin.'
+        ]);
+        exit;
     }
 
+    // Verifica senha
     if (!password_verify($password, $user['password_hash'])) {
-        throw new Exception('Usuário ou senha incorretos.');
+        http_response_code(401);
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Usuário ou senha incorretos.',
+            'code' => 'INVALID_PASSWORD',
+            'hint' => 'Senha incorreta. Acesse /MCSRC/backend/debug.php para resetar.'
+        ]);
+        exit;
     }
 
     // Gera token e salva em sessions
     $token = generateToken(64);
     $expiresAt = (new DateTime())->add(new DateInterval('PT8H'))->format('Y-m-d H:i:s');
 
-    $stmt = $pdo->prepare("INSERT INTO sessions (user_id, token, expires_at) VALUES (?, ?, ?)");
-    $stmt->execute([$user['id'], $token, $expiresAt]);
+    try {
+        $stmt = $pdo->prepare("INSERT INTO sessions (user_id, token, expires_at) VALUES (?, ?, ?)");
+        $stmt->execute([$user['id'], $token, $expiresAt]);
+    } catch (PDOException $e) {
+        http_response_code(500);
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'Erro ao criar sessão.',
+            'code' => 'SESSION_ERROR'
+        ]);
+        exit;
+    }
 
+    // Sucesso!
+    http_response_code(200);
     echo json_encode([
         'status' => 'success',
-        'message' => 'Autenticado',
+        'message' => 'Login realizado com sucesso!',
         'token' => $token,
         'user' => [
             'id' => (int)$user['id'],
